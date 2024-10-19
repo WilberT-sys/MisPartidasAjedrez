@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Partidas de Ajedrez</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Guardar Partidas de Ajedrez</h1>
+
+    <form id="gameForm">
+        <input type="text" id="player1" placeholder="Jugador 1" required>
+        <input type="text" id="player2" placeholder="Jugador 2" required>
+        <input type="date" id="gameDate" required>
+        <select id="result" required>
+            <option value="">Resultado</option>
+            <option value="Ganó Jugador 1">Ganó Jugador 1</option>
+            <option value="Ganó Jugador 2">Ganó Jugador 2</option>
+            <option value="Empate">Empate</option>
+        </select>
+        <button type="submit">Guardar Partida</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Jugador 1</th>
+                <th>Jugador 2</th>
+                <th>Fecha</th>
+                <th>Resultado</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="gamesTableBody">
+            <!-- Las partidas se mostrarán aquí -->
+        </tbody>
+    </table>
+
+    <script>
+        // Función para generar un ID único
+        function generateId() {
+            return '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Función para cargar las partidas guardadas al cargar la página
+        function loadGames() {
+            const games = JSON.parse(localStorage.getItem('games')) || [];
+            const tableBody = document.getElementById('gamesTableBody');
+            tableBody.innerHTML = ''; // Limpiar el contenido previo
+            games.forEach(game => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${game.player1}</td>
+                    <td>${game.player2}</td>
+                    <td>${game.date}</td>
+                    <td>${game.result}</td>
+                    <td><button class="delete-btn" onclick="deleteGame('${game.id}')">Eliminar</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Función para agregar una nueva partida
+        document.getElementById('gameForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const player1 = document.getElementById('player1').value;
+            const player2 = document.getElementById('player2').value;
+            const date = document.getElementById('gameDate').value;
+            const result = document.getElementById('result').value;
+
+            const newGame = {
+                id: generateId(),
+                player1,
+                player2,
+                date,
+                result
+            };
+
+            const games = JSON.parse(localStorage.getItem('games')) || [];
+            games.push(newGame);
+            localStorage.setItem('games', JSON.stringify(games));
+
+            // Limpiar el formulario y recargar la tabla
+            this.reset();
+            loadGames();
+        });
+
+        // Función para eliminar una partida
+        function deleteGame(id) {
+            const games = JSON.parse(localStorage.getItem('games')) || [];
+            const updatedGames = games.filter(game => game.id !== id);
+            localStorage.setItem('games', JSON.stringify(updatedGames));
+            loadGames(); // Recargar la tabla después de eliminar
+        }
+
+        // Cargar las partidas al iniciar
+        window.onload = loadGames;
+    </script>
+
+</body>
+</html>
